@@ -1,22 +1,27 @@
-import axios from "axios";
+import axios from "axios"
 
-const URL = 'http://127.0.0.1:8090/api/collections/todolist/records'
+const URL = "http://localhost:1337/api/todos"
 
 export const getTodoItem = async () => {
   try {
     const { data } = await axios.get(URL)
-    return data.items
+    return data
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error)
   }
 }
 
 export const addTodoItem = async (todo) => {
   try {
-    const { data } = await axios.post(URL, {todo})
+    console.log("todo", todo)
+    const { data } = await axios.post(URL, {
+      data: {
+        todo,
+      },
+    })
     return data
   } catch (err) {
-    console.log('error', err);
+    console.log("error", err)
   }
 }
 
@@ -25,15 +30,19 @@ export const deleteTodoItem = async (id) => {
     const { data } = await axios.delete(`${URL}/${id}`)
     return data
   } catch (error) {
-    console.error('[delete todoItem Failed]');
+    console.error("[delete todoItem Failed]")
   }
 }
 
 export const changeTodoItem = async (todo, id) => {
   try {
-    const { data } = await axios.patch(`${URL}/${id}`,{todo})
-    return data
+    const res = await axios.put(`${URL}/${id}`, {
+      data: {
+        todo,
+      },
+    })
+    return res.data
   } catch (error) {
-    console.error('[change todoItem Failed]')
+    console.error("[change todoItem Failed]")
   }
 }

@@ -1,22 +1,27 @@
-import { useEffect, useState } from 'react'
-import { changeTodoItem, getTodoItem, deleteTodoItem, addTodoItem } from '../../api/todo'
-import Button from '../button/button'
-import styles from './header.module.scss'
+import { useEffect, useState } from "react"
+import {
+  changeTodoItem,
+  getTodoItem,
+  deleteTodoItem,
+  addTodoItem,
+} from "../../api/todo"
+import Button from "../button/button"
+import styles from "./header.module.scss"
 
 function Header() {
-  const [todoItems, setTodoItem] = useState([])
-  const [task, setTask] = useState('')
-  
+  const [todoItems, setTodoItems] = useState([])
+  const [task, setTask] = useState("")
+
   const handleAddTodo = async () => {
     try {
-      if(!task){
-        return;
+      if (!task) {
+        return
       }
       const newTodo = await addTodoItem(task)
-      setTodoItem((prevTodoItem) => [...prevTodoItem, newTodo]);
-      setTask('')
+      setTodoItems((prev) => [...prev, newTodo.data])
+      setTask("")
     } catch (err) {
-      console.error('Error adding todo:', err);
+      console.error("Error adding todo:", err)
     }
   }
 
@@ -24,75 +29,88 @@ function Header() {
     try {
       await deleteTodoItem(id)
       const updatedTodoItem = todoItems.filter((todo) => todo.id !== id)
-      setTodoItem(updatedTodoItem)
+      setTodoItems(updatedTodoItem)
     } catch (err) {
-      console.error('Error deleting todo:', err)
+      console.error("Error deleting todo:", err)
     }
   }
 
   const handleInputChange = async (e, id) => {
     try {
-      const updateValue = e.target.value;
+      const updateValue = e.target.value
       const updatedTodoItem = todoItems.map((todo) => {
         if (todo.id === id) {
-          return {...todo, todo: updateValue}
+          return {
+            ...todo,
+            attributes: { ...todo.attributes, todo: updateValue },
+          }
         }
-        return todo  
-    })
-      setTodoItem(updatedTodoItem)
+        return todo
+      })
+      setTodoItems(updatedTodoItem)
       await changeTodoItem(updateValue, id)
     } catch (err) {
-      console.error('Error changing todo:', err)
+      console.error("Error changing todo:", err)
     }
   }
 
-  useEffect(()=> {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const todoItem = await getTodoItem()
-        setTodoItem(todoItem)
+        console.log(todoItem)
+        setTodoItems(todoItem.data)
       } catch (error) {
-        console.error(error);
+        console.error(error)
       }
     }
     fetchData()
-  },[])
+  }, [])
 
   return (
-    <div> 
-      <nav className='navContainer'>DailyPlan</nav>
+    <div>
+      <nav className="navContainer">DailyPlan</nav>
       <div>
-        <p className='todoList'>Add Todo List</p>
+        <p className="todoList">Add Todo List</p>
       </div>
-      <div className='newTodoContainer'>
-        <input className='checkBox' type="checkbox" />
-        <input 
-          className='newInputText' 
-          type="text" 
+      <div className="newTodoContainer">
+        <input className="checkBox" type="checkbox" />
+        <input
+          className="newInputText"
+          type="text"
           value={task}
-          placeholder='new todo...'
+          placeholder="new todo..."
           onChange={(e) => setTask(e.target.value)}
-          />
-        <Button 
-          onClick={handleAddTodo} 
-          className={styles.addButton} 
-        >✓</Button>
+        />
+        <Button onClick={handleAddTodo} className={styles.addButton}>
+          ✓
+        </Button>
       </div>
       <div>
-        <p className='todoList'>Todo List</p>
+        <p className="todoList">Todo List</p>
       </div>
-      <div className='taskContainer'>
-        {todoItems.length > 0 && todoItems.map((todoItem)=> {
-          return ( <div className='todoContainer' key={todoItem.id} >
-          <input className='checkBox' type="checkbox" />
-          <input className='inputText' type="text" value={todoItem.todo || ''} onChange={(e) => handleInputChange(e, todoItem.id)} />
-        <Button 
-          onClick={() => handleDelete(todoItem.id)} 
-          className={styles.delButton} 
-        >X</Button>
-        </div> )
-    })}
-    </div>
+      <div className="taskContainer">
+        {todoItems.length > 0 &&
+          todoItems.map((todoItem) => {
+            return (
+              <div className="todoContainer" key={todoItem.id}>
+                <input className="checkBox" type="checkbox" />
+                <input
+                  className="inputText"
+                  type="text"
+                  value={todoItem.attributes.todo || ""}
+                  onChange={(e) => handleInputChange(e, todoItem.id)}
+                />
+                <Button
+                  onClick={() => handleDelete(todoItem.id)}
+                  className={styles.delButton}
+                >
+                  X
+                </Button>
+              </div>
+            )
+          })}
+      </div>
     </div>
   )
 }
