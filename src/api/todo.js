@@ -36,12 +36,12 @@ export const deleteTodoItem = async (id) => {
 
 export const changeTodoItem = async (todo, id) => {
   try {
-    const res = await axios.put(`${URL}/${id}`, {
+    const { data } = await axios.put(`${URL}/${id}`, {
       data: {
         todo,
       },
     })
-    return res.data
+    return data
   } catch (error) {
     console.error("[change todoItem Failed]")
   }

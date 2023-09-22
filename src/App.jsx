@@ -1,13 +1,13 @@
-import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Header from './components/header/header'
+import "./App.css"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import TodoPage from "./components/todoPage.jsx/todoPage"
 
 function App() {
   return (
-    <div className='App'>
+    <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="*" element={<Header/>} />
+          <Route path="*" element={<TodoPage />} />
         </Routes>
       </BrowserRouter>
     </div>
@@ -15,5 +15,3 @@ function App() {
 }
 
 export default App
-
-
