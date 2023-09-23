@@ -4,6 +4,7 @@ import {
   getTodoItem,
   deleteTodoItem,
   addTodoItem,
+  isCompletedTodo,
 } from "../../api/todo"
 import Button from "../button/button"
 import style from "../button/button.module.scss"
@@ -20,7 +21,7 @@ function TodoPage() {
       } else if (e.key === "Enter" || e.type === "click") {
         const newTodo = await addTodoItem(task)
         setTodoItems((prev) => [...prev, newTodo.data])
-        console.log([newTodo.data], newTodo.data)
+        console.log([newTodo], newTodo)
         setTask("")
       }
     } catch (err) {
@@ -45,7 +46,7 @@ function TodoPage() {
         if (todo.id === id) {
           return {
             ...todo,
-            attributes: { ...todo.attributes, todo: updateValue },
+            attributes: { ...todo.attributes, title: updateValue },
           }
         }
         return todo
@@ -54,6 +55,24 @@ function TodoPage() {
       await changeTodoItem(updateValue, id)
     } catch (err) {
       console.error("Error changing todo:", err)
+    }
+  }
+
+  const handleCompleted = async (id, isCompleted) => {
+    try {
+      const completed = todoItems.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            attributes: { ...todo.attributes, isCompleted: !isCompleted },
+          }
+        }
+        return todo
+      })
+      setTodoItems(completed)
+      await isCompletedTodo(id, !isCompleted)
+    } catch (error) {
+      console.error("Error handleCompleted todo:", error)
     }
   }
 
@@ -97,11 +116,26 @@ function TodoPage() {
           todoItems.map((todoItem) => {
             return (
               <div className={styles.todoContainer} key={todoItem.id}>
-                <input className={styles.checkBox} type="checkbox" />
+                <input
+                  className={styles.checkBox}
+                  type="checkbox"
+                  checked={todoItem.attributes.isCompleted}
+                  onChange={() =>
+                    handleCompleted(
+                      todoItem.id,
+                      todoItem.attributes.isCompleted
+                    )
+                  }
+                />
                 <input
                   className={styles.inputText}
+                  style={{
+                    textDecoration: todoItem.attributes.isCompleted
+                      ? "line-through"
+                      : "none",
+                  }}
                   type="text"
-                  value={todoItem.attributes.todo || ""}
+                  value={todoItem.attributes.title}
                   onChange={(e) => handleInputChange(e, todoItem.id)}
                 />
                 <Button

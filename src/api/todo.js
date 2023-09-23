@@ -11,12 +11,11 @@ export const getTodoItem = async () => {
   }
 }
 
-export const addTodoItem = async (todo) => {
+export const addTodoItem = async (title) => {
   try {
-    console.log("todo", todo)
     const { data } = await axios.post(URL, {
       data: {
-        todo,
+        title,
       },
     })
     return data
@@ -44,5 +43,18 @@ export const changeTodoItem = async (todo, id) => {
     return data
   } catch (error) {
     console.error("[change todoItem Failed]")
+  }
+}
+
+export const isCompletedTodo = async (id, isCompleted) => {
+  try {
+    const { data } = await axios.put(`${URL}/${id}`, {
+      data: {
+        isCompleted,
+      },
+    })
+    return data
+  } catch (error) {
+    console.error("[change isCompleted Failed]")
   }
 }

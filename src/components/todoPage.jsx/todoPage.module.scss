@@ -76,6 +76,7 @@
   outline-style: none;
   border-bottom: 1px solid powderblue;
   letter-spacing: 1px;
+  resize: none;
 }
 
 .inputText {
@@ -89,4 +90,9 @@
   outline-style: none;
   border-bottom: 1px solid powderblue;
   letter-spacing: 1px;
+  resize: none;
+}
+
+.lineThrough {
+  text-decoration: line-through;
 }
