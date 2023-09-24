@@ -1,64 +1,100 @@
+import React from "react"
 import { useEffect, useState } from "react"
 import {
   changeTodoItem,
   getTodoItem,
   deleteTodoItem,
   addTodoItem,
-  isCompletedTodo,
-} from "../../api/todo"
-import Button from "../button/button"
+  changeCompletedTodoItem,
+} from "@/api/todo.ts"
+import Button from "../Button/Button.js"
 import style from "../button/button.module.scss"
 import styles from "./todoPage.module.scss"
+import toast, { Toaster } from "react-hot-toast"
+import { TodoItemType } from "./types/index.js"
 
 function TodoPage() {
-  const [todoItems, setTodoItems] = useState([])
+  const [todoItems, setTodoItems] = useState<TodoItemType[]>([])
   const [task, setTask] = useState("")
 
-  const handleAddTodo = async (e) => {
+  const handleAddKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!task || e.key !== "Enter") {
+      return
+    }
+    addTodo()
+  }
+
+  const handleAddClick = () => {
+    if (!task) {
+      return
+    }
+    addTodo()
+  }
+
+  const addTodo = async () => {
     try {
-      if (!task) {
-        return
-      } else if (e.key === "Enter" || e.type === "click") {
-        const newTodo = await addTodoItem(task)
-        setTodoItems((prev) => [...prev, newTodo.data])
-        console.log([newTodo], newTodo)
-        setTask("")
-      }
+      const newTodo = await addTodoItem(task)
+      setTodoItems((prev) => [...prev, newTodo.data])
+      toast.success("Success! Added new todo item.", {
+        duration: 1000,
+        icon: "🎉",
+      })
+      setTask("")
     } catch (err) {
       console.error("Error adding todo:", err)
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     try {
       await deleteTodoItem(id)
       const updatedTodoItem = todoItems.filter((todo) => todo.id !== id)
       setTodoItems(updatedTodoItem)
+      toast.success("Success! Deleted todo item.", {
+        duration: 1000,
+        icon: "👏",
+      })
     } catch (err) {
       console.error("Error deleting todo:", err)
     }
   }
 
-  const handleInputChange = async (e, id) => {
-    try {
-      const updateValue = e.target.value
-      const updatedTodoItem = todoItems.map((todo) => {
-        if (todo.id === id) {
-          return {
-            ...todo,
-            attributes: { ...todo.attributes, title: updateValue },
-          }
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: number
+  ) => {
+    const updateValue = e.target.value
+    const updatedTodoItem = todoItems.map((todo) => {
+      if (todo.id === id) {
+        return {
+          ...todo,
+          attributes: { ...todo.attributes, title: updateValue },
         }
-        return todo
+      }
+      return todo
+    })
+    setTodoItems(updatedTodoItem)
+  }
+
+  const handleChangeKeyDown = async (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    todoItem: TodoItemType
+  ) => {
+    try {
+      if (!todoItem.attributes.title || e.key !== "Enter") {
+        return
+      }
+      await changeTodoItem(todoItem.attributes.title, todoItem.id)
+      toast.success("Success! Change selected todo item.", {
+        duration: 1000,
+        icon: "👌",
       })
-      setTodoItems(updatedTodoItem)
-      await changeTodoItem(updateValue, id)
-    } catch (err) {
-      console.error("Error changing todo:", err)
+    } catch (error) {
+      console.error("Error changeTodoItem:", error)
     }
   }
 
-  const handleCompleted = async (id, isCompleted) => {
+  const handleCompleted = async (id: number, isCompleted: boolean) => {
     try {
       const completed = todoItems.map((todo) => {
         if (todo.id === id) {
@@ -70,7 +106,11 @@ function TodoPage() {
         return todo
       })
       setTodoItems(completed)
-      await isCompletedTodo(id, !isCompleted)
+      await changeCompletedTodoItem(id, !isCompleted)
+      toast.success("Success! Completed todo item.", {
+        duration: 1000,
+        icon: "💯",
+      })
     } catch (error) {
       console.error("Error handleCompleted todo:", error)
     }
@@ -102,11 +142,12 @@ function TodoPage() {
           value={task}
           placeholder="new todo..."
           onChange={(e) => setTask(e.target.value)}
-          onKeyDown={handleAddTodo}
+          onKeyDown={handleAddKeyDown}
         />
-        <Button onClick={handleAddTodo} className={style.addButton}>
+        <Button onClick={handleAddClick} className={style.addButton}>
           ✓
         </Button>
+        <Toaster />
       </div>
       <div>
         <p className={styles.todoList}>Todo List</p>
@@ -137,6 +178,7 @@ function TodoPage() {
                   type="text"
                   value={todoItem.attributes.title}
                   onChange={(e) => handleInputChange(e, todoItem.id)}
+                  onKeyDown={(e) => handleChangeKeyDown(e, todoItem)}
                 />
                 <Button
                   onClick={() => handleDelete(todoItem.id)}

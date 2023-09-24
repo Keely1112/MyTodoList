@@ -7,11 +7,11 @@ export const getTodoItem = async () => {
     const { data } = await axios.get(URL)
     return data
   } catch (error) {
-    console.log("error", error)
+    throw new Error("Failed to fetch todo items")
   }
 }
 
-export const addTodoItem = async (title) => {
+export const addTodoItem = async (title: string) => {
   try {
     const { data } = await axios.post(URL, {
       data: {
@@ -20,33 +20,33 @@ export const addTodoItem = async (title) => {
     })
     return data
   } catch (err) {
-    console.log("error", err)
+    throw new Error("Failed to add todo item")
   }
 }
 
-export const deleteTodoItem = async (id) => {
+export const deleteTodoItem = async (id: number) => {
   try {
     const { data } = await axios.delete(`${URL}/${id}`)
     return data
   } catch (error) {
-    console.error("[delete todoItem Failed]")
+    throw new Error("Failed to delete todo item")
   }
 }
 
-export const changeTodoItem = async (todo, id) => {
+export const changeTodoItem = async (title: string, id: number) => {
   try {
     const { data } = await axios.put(`${URL}/${id}`, {
       data: {
-        todo,
+        title,
       },
     })
     return data
   } catch (error) {
-    console.error("[change todoItem Failed]")
+    throw new Error("Failed to change todo item")
   }
 }
 
-export const isCompletedTodo = async (id, isCompleted) => {
+export const changeCompletedTodoItem = async (id: number, isCompleted: boolean) => {
   try {
     const { data } = await axios.put(`${URL}/${id}`, {
       data: {
@@ -55,6 +55,6 @@ export const isCompletedTodo = async (id, isCompleted) => {
     })
     return data
   } catch (error) {
-    console.error("[change isCompleted Failed]")
+    throw new Error("Failed to change isCompleted status")
   }
 }
