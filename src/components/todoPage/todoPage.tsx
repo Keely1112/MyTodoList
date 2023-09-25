@@ -1,21 +1,23 @@
 import React from "react"
 import { useEffect, useState } from "react"
 import {
-  changeTodoItem,
   getTodoItem,
   deleteTodoItem,
   addTodoItem,
   changeCompletedTodoItem,
+  changeTodoItem,
 } from "@/api/todo.ts"
 import Button from "../Button/Button.js"
 import style from "../button/button.module.scss"
 import styles from "./todoPage.module.scss"
 import toast, { Toaster } from "react-hot-toast"
 import { TodoItemType } from "./types/index.js"
+import InputModal from "../InputModal/InputModal.js"
 
 function TodoPage() {
   const [todoItems, setTodoItems] = useState<TodoItemType[]>([])
   const [task, setTask] = useState("")
+  const [selectedTodo, setSelectedTodo] = useState<TodoItemType | null>(null)
 
   const handleAddKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!task || e.key !== "Enter") {
@@ -59,41 +61,6 @@ function TodoPage() {
     }
   }
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    id: number
-  ) => {
-    const updateValue = e.target.value
-    const updatedTodoItem = todoItems.map((todo) => {
-      if (todo.id === id) {
-        return {
-          ...todo,
-          attributes: { ...todo.attributes, title: updateValue },
-        }
-      }
-      return todo
-    })
-    setTodoItems(updatedTodoItem)
-  }
-
-  const handleChangeKeyDown = async (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    todoItem: TodoItemType
-  ) => {
-    try {
-      if (!todoItem.attributes.title || e.key !== "Enter") {
-        return
-      }
-      await changeTodoItem(todoItem.attributes.title, todoItem.id)
-      toast.success("Success! Change selected todo item.", {
-        duration: 1000,
-        icon: "👌",
-      })
-    } catch (error) {
-      console.error("Error changeTodoItem:", error)
-    }
-  }
-
   const handleCompleted = async (id: number, isCompleted: boolean) => {
     try {
       const completed = todoItems.map((todo) => {
@@ -113,6 +80,54 @@ function TodoPage() {
       })
     } catch (error) {
       console.error("Error handleCompleted todo:", error)
+    }
+  }
+
+  const handleInputModalOpen = (todoItem: TodoItemType) => {
+    setSelectedTodo(todoItem)
+  }
+
+  const handleInputModalClose = () => {
+    setSelectedTodo(null)
+  }
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: number
+  ) => {
+    const updateValue = e.target.value
+    const updatedTodoItem = todoItems.map((todo) => {
+      if (todo.id === id) {
+        return {
+          ...todo,
+          attributes: { ...todo.attributes, title: updateValue },
+        }
+      }
+      return todo
+    })
+    console.log("updatedTodoItem", updatedTodoItem)
+
+    setTodoItems(updatedTodoItem)
+  }
+
+  const handleChangeKeyDown = async (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    todoItem: TodoItemType
+  ) => {
+    try {
+      if (!todoItem.attributes.title || e.key !== "Enter") {
+        return
+      }
+      console.log("todoItem.attributes.title", todoItem.attributes.title)
+
+      await changeTodoItem(todoItem.attributes.title, todoItem.id)
+      console.log("111", todoItem.attributes.title)
+      toast.success("Success! Change selected todo item.", {
+        duration: 1000,
+        icon: "👌",
+      })
+    } catch (error) {
+      console.error("Error changeTodoItem:", error)
     }
   }
 
@@ -177,8 +192,7 @@ function TodoPage() {
                   }}
                   type="text"
                   value={todoItem.attributes.title}
-                  onChange={(e) => handleInputChange(e, todoItem.id)}
-                  onKeyDown={(e) => handleChangeKeyDown(e, todoItem)}
+                  onClick={() => handleInputModalOpen(todoItem)}
                 />
                 <Button
                   onClick={() => handleDelete(todoItem.id)}
@@ -186,6 +200,14 @@ function TodoPage() {
                 >
                   X
                 </Button>
+                {selectedTodo && (
+                  <InputModal
+                    todoItem={selectedTodo}
+                    onClose={handleInputModalClose}
+                    onChange={handleInputChange}
+                    onKeyDown={handleChangeKeyDown}
+                  />
+                )}
               </div>
             )
           })}

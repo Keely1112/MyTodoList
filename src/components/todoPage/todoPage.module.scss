@@ -93,6 +93,11 @@
   resize: none;
 }
 
+.newInputText:hover,
+.inputText:hover {
+  border: 2px solid darkcyan;
+}
+
 .lineThrough {
   text-decoration: line-through;
 }

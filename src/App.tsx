@@ -1,6 +1,6 @@
 import "./App.css"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import TodoPage from "./components/todoPage.jsx/todoPage"
+import TodoPage from "./components/todoPage/todoPage"
 
 function App() {
   return (
